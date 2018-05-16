@@ -1,4 +1,6 @@
 using System;
+using System.IO;
+using System.IO.Pipes;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
@@ -119,19 +121,36 @@ class Program
 
     static void Main(string[] args)
     {
-        var outstream = Console.OpenStandardOutput();
-        var instream  = Console.OpenStandardInput();
-
-        int i;
-
-        // Buffer for reading data
-        var bytes = new Byte[AGENT_MAX_MSGLEN];
-
-        // Loop to receive all the data sent by the client.
-        while((i = instream.Read(bytes, 0, bytes.Length))!=0)
+        using (NamedPipeServerStream pipeServer =
+            new NamedPipeServerStream("ssh-pageant", PipeDirection.InOut))
         {
-            var msg = Query(bytes);
-            outstream.Write(msg, 0, msg.Length);
+            while (true)
+            {
+                pipeServer.WaitForConnection();
+
+                try
+                {
+                    var bytes = new byte[AGENT_MAX_MSGLEN];
+
+                    byte[] fieldLength = new byte[4];
+                    while (pipeServer.Read(bytes, 0, 4) != 0)
+                    {
+                        Array.Copy(bytes, fieldLength, 4);
+                        Array.Reverse(fieldLength);
+                        var length = BitConverter.ToUInt32(fieldLength, 0);
+
+                        pipeServer.Read(bytes, 4, (int) length);
+                        var msg = Query(bytes);
+                        pipeServer.Write(msg, 0, msg.Length);
+                    }
+                }
+                catch (IOException e)
+                {
+                    Console.WriteLine("ERROR: {0}", e.Message);
+                }
+
+                pipeServer.Disconnect();
+            }
         }
     }
 }
