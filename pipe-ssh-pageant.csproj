@@ -4,9 +4,30 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <RuntimeIdentifier>win10-x64</RuntimeIdentifier>
+    <Version>1.0.10</Version>
+    <Company>pipe-ssh-pageant</Company>
+    <Authors>valarie-ci-bot</Authors>
+    <Product>pipe-ssh-pageant</Product>
+    <Description>A Pageant -&gt; TCP bridge for use with Windows 10 OpenSSH Client, allowing for Pageant to be used as an ssh-ageant.
+Original Project : https://github.com/btolfa/pipe-ssh-pageant
+Which in turn is based on : https://github.com/benpye/wsl-ssh-pageant</Description>
+    <PackageProjectUrl>https://github.com/tprasadtp/pipe-ssh-pageant</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/tprasadtp/pipe-ssh-pageant</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugType>Portable</DebugType>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ILLink.Tasks" Version="0.1.4-preview-906439" />
+  </ItemGroup>
 </Project>
