@@ -1,0 +1,39 @@
+version: 1.0.{build}
+image: Visual Studio 2017
+skip_tags: true
+init:
+- cmd: git config --global core.autocrlf true
+dotnet_csproj:
+  patch: true
+  file: '**\*.csproj'
+  version: '{version}'
+  package_version: '{version}'
+  assembly_version: '{version}'
+  file_version: '{version}'
+  informational_version: '{version}'
+build_script:
+- ps: >-
+    dotnet --version
+
+    dotnet publish -v m --configuration Release --force --self-contained --output .\Release-Pipe-SSH-Pageant\
+
+    $env:Path += ";C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.14.26428\bin\Hostx64\x64"
+
+    editbin /subsystem:windows .\Release-Pipe-SSH-Pageant\pipe-ssh-pageant.exe
+
+    7z a Pipe-SSH-Pageant-$env:APPVEYOR_BUILD_VERSION.zip .\Release-Pipe-SSH-Pageant\
+test: off
+artifacts:
+- path: Pipe-SSH-Pageant*.zip
+  name: Github Releases
+deploy:
+- provider: GitHub
+  tag: appveyor-$(APPVEYOR_BUILD_VERSION)
+  release: PIPE-SSH-PAGEANT - Release $(APPVEYOR_BUILD_VERSION)
+  description: 'Automated Build & Release.\nBuild Commit : $(APPVEYOR_REPO_COMMIT).\nBuild Version : $(APPVEYOR_BUILD_VERSION)'
+  auth_token:
+    secure: lIVCJnEB2AFd6K7NTsBZI+FkKASVn/FPcaktkB5PejT7Xd9lqz5Oi1+8mSc4JihF
+  prerelease: true
+  force_update: true
+  on:
+    branch: master
